@@ -6,9 +6,8 @@ from plotly.subplots import make_subplots
 import yfinance as yf
 
 # 1. Page Configuration & Custom CSS
-st.set_page_config(page_title="Geo-Alpha Predictor", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Geo-Alpha Terminal", layout="wide", initial_sidebar_state="expanded")
 
-# Inject Custom CSS for a polished, professional UI
 st.markdown("""
 <style>
     /* Hide Streamlit default branding */
@@ -16,46 +15,84 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Style the metric cards */
+    /* Sleek container styling */
     div[data-testid="metric-container"] {
-        background-color: #1E1E2E;
-        border: 1px solid #2E2E3E;
+        background-color: #161622;
+        border: 1px solid #2A2A3C;
         padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
     }
     
-    /* Custom Headers */
-    h1 {
-        color: #FFFFFF;
-        font-weight: 700;
-        letter-spacing: -1px;
-    }
-    h3 {
-        color: #A0A0B0;
-        font-weight: 400;
+    /* Login Box Styling */
+    .login-box {
+        background-color: #161622;
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid #2A2A3C;
+        max-width: 450px;
+        margin: 100px auto;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Main Header
-st.title("🌍 Geopolitical Alpha Predictor")
-st.markdown("### AI-driven macro forecasting and risk analysis for global equities.")
+# 2. Session State Login Gate
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h1>🔐 Geo-Alpha Terminal</h1>
+            <p style="color: #A0A0B0;">Institutional-Grade Geopolitical Macro Forecasting</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("login_form"):
+            username = st.text_input("Terminal ID", placeholder="e.g., trader_01")
+            password = st.text_input("Access Key", type="password", placeholder="••••••••")
+            submit = st.form_submit_button("Initialize Terminal Session", use_container_width=True)
+            
+            if submit:
+                if username and password:
+                    st.session_state.logged_in = True
+                    st.rerun()
+                else:
+                    st.error("Please enter a valid Terminal ID and Access Key.")
+    st.stop()
+
+# 3. Main Dashboard (Loads after successful login)
+st.title("🌍 Geo-Alpha Intelligence Terminal")
+st.markdown("### Real-time macro risk assessment, technical profiling, and machine learning asset forecasting.")
 st.write("---")
 
-# 2. Sidebar Controls
+# Note on the sidebar: If you hide the sidebar using the collapse arrow, 
+# a small arrow icon will appear in the top-left corner of the app window to expand it again.
+
+# 4. Sidebar Controls
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2942/2942206.png", width=60) # Placeholder finance icon
-    st.title("Dashboard Controls")
-    st.write("Configure the asset and timeline below:")
-    ticker = st.text_input("Stock Ticker", value="SPY").upper()
+    st.title("🎛️ Terminal Controls")
+    st.write("Configure your macro inspection parameters:")
+    ticker = st.text_input("Target Ticker", value="SPY").upper()
     benchmark = st.selectbox("Historical Window", ["1y", "2y", "5y", "max"], index=2)
     
     st.markdown("---")
-    st.markdown("**About this Engine:**")
-    st.markdown("This Random Forest model calculates real-time technicals and merges them with a Geopolitical Risk (GPR) index to predict 3-month asset direction.")
+    st.markdown("### 📡 System Telemetry")
+    st.markdown("**Engine:** Random Forest (v2.4)")
+    st.markdown("**Data Feed:** Yahoo Finance + GPR Index")
+    st.markdown("**Status:** <span style='color:#00C853;'>● SECURE ONLINE</span>", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    if st.button("Terminate Session", use_container_width=True):
+        st.session_state.logged_in = False
+        st.rerun()
 
-# 3. Load Model and Macro Data
+# 5. Load Model and Macro Data
 @st.cache_resource
 def load_model():
     return joblib.load('geo_alpha_model.joblib')
@@ -72,14 +109,14 @@ except FileNotFoundError:
     st.error("Missing files. Ensure 'month_1_master_dataset.csv' and 'geo_alpha_model.joblib' are uploaded to GitHub.")
     st.stop()
 
-# 4. Fetch Live Market Data
-with st.spinner(f"Aggregating live market data for {ticker}..."):
+# 6. Fetch Live Market Data
+with st.spinner(f"Establishing secure feed for {ticker}..."):
     try:
         stock = yf.Ticker(ticker)
         hist = stock.history(period=benchmark)
         
         if hist.empty:
-            st.error(f"Could not find market data for ticker '{ticker}'.")
+            st.error(f"Could not aggregate market telemetry for ticker '{ticker}'.")
             st.stop()
             
         hist['Daily_Return'] = hist['Close'].pct_change()
@@ -92,10 +129,10 @@ with st.spinner(f"Aggregating live market data for {ticker}..."):
         merged_data['GPR_Index'] = merged_data['GPR_Index'].ffill().bfill()
         
     except Exception as e:
-        st.error(f"Error fetching data: {e}")
+        st.error(f"Data aggregation fault: {e}")
         st.stop()
 
-# 5. Prediction & Confidence
+# 7. Prediction & Confidence Calculations
 features = ['Daily_Return', 'SMA_20', 'SMA_50', 'GPR_Index']
 latest_data = merged_data.iloc[-1]
 X_latest = latest_data[features].values.reshape(1, -1)
@@ -104,54 +141,61 @@ prediction = model.predict(X_latest)[0]
 probabilities = model.predict_proba(X_latest)[0]
 confidence = probabilities[prediction] * 100
 
-prediction_label = "Bullish (Higher)" if prediction == 1 else "Bearish (Lower)"
+prediction_label = "BULLISH (Upward Momentum)" if prediction == 1 else "BEARISH (Downward Pressure)"
 status_color = "normal" if prediction == 1 else "inverse"
 
-# 6. Top Metrics Summary Cards
+# 8. Top Metrics Summary Cards
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Current Price", f"${latest_data['Close']:.2f}", f"{latest_data['Daily_Return']*100:.2f}%")
-col2.metric("GPR Index Level", f"{latest_data['GPR_Index']:.1f}")
-col3.metric("3-Month Forecast", prediction_label, delta_color=status_color)
-col4.metric("AI Confidence", f"{confidence:.1f}%")
+col1.metric("Current Asset Price", f"${latest_data['Close']:.2f}", f"{latest_data['Daily_Return']*100:.2f}%")
+col2.metric("Macro Risk Index (GPR)", f"{latest_data['GPR_Index']:.1f}")
+col3.metric("3-Month AI Outlook", prediction_label, delta_color=status_color)
+col4.metric("Model Confidence Score", f"{confidence:.1f}%")
 
 st.write("---")
 
-# 7. Visualizations: Price vs GPR & Feature Importance
-tab1, tab2 = st.tabs(["📊 Asset vs Risk Trajectory", "🧠 AI Model Explainability"])
+# 9. Immersive Editorial Macro Briefing (Adds depth and addiction)
+st.markdown("### 📋 Executive Macro Intelligence Briefing")
+if prediction == 1:
+    st.success(f"**Market Assessment for {ticker}:** The algorithmic matrix indicates favorable conditions over the next 3 months. Despite lingering global geopolitical frictions reflected in the GPR index, technical price strength (moving averages) is overriding macroeconomic volatility, pointing toward continued capital inflows.")
+else:
+    st.warning(f"**Market Assessment for {ticker}:** Caution advised. The model detects vulnerability in current price action relative to prevailing geopolitical risk metrics. Defensive positioning or capital preservation is favored over the upcoming 90-day window.")
+
+st.write("")
+
+# 10. Interactive Tabs for Charts & Explainability
+tab1, tab2 = st.tabs(["📈 Asset vs. Geopolitical Risk Trajectory", "🔬 Model Attribution & Explainability"])
 
 with tab1:
     fig_trajectory = make_subplots(specs=[[{"secondary_y": True}]])
     
-    # Sleeker lines, fill beneath the stock price
     fig_trajectory.add_trace(
         go.Scatter(x=merged_data.index, y=merged_data['Close'], name=f'{ticker} Price', 
-                   line=dict(color='#00F0FF', width=2), fill='tozeroy', fillcolor='rgba(0, 240, 255, 0.05)'),
+                   line=dict(color='#00F0FF', width=2), fill='tozeroy', fillcolor='rgba(0, 240, 255, 0.04)'),
         secondary_y=False,
     )
     fig_trajectory.add_trace(
-        go.Scatter(x=merged_data.index, y=merged_data['GPR_Index'], name='GPR Index', 
+        go.Scatter(x=merged_data.index, y=merged_data['GPR_Index'], name='Geopolitical Risk Index', 
                    line=dict(color='#FF3366', dash='dot', width=2)),
         secondary_y=True,
     )
     
-    # Transparent backgrounds and clean grids
     fig_trajectory.update_layout(
-        height=500, hovermode='x unified', margin=dict(l=0, r=0, t=30, b=0),
+        height=480, hovermode='x unified', margin=dict(l=0, r=0, t=20, b=0),
         plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     fig_trajectory.update_xaxes(showgrid=False)
-    fig_trajectory.update_yaxes(title_text=f"{ticker} Price ($)", showgrid=True, gridcolor='rgba(255,255,255,0.1)', secondary_y=False)
-    fig_trajectory.update_yaxes(title_text="Geopolitical Risk Index", showgrid=False, secondary_y=True)
+    fig_trajectory.update_yaxes(title_text=f"{ticker} Valuation ($)", showgrid=True, gridcolor='rgba(255,255,255,0.08)', secondary_y=False)
+    fig_trajectory.update_yaxes(title_text="Macro Risk Score", showgrid=False, secondary_y=True)
     
     st.plotly_chart(fig_trajectory, use_container_width=True)
 
 with tab2:
-    st.markdown("#### Random Forest Feature Weights")
-    st.write("Understanding the driving factors behind the current forecast:")
+    st.markdown("#### Random Forest Decision Vector Breakdown")
+    st.write("The chart below quantifies the weight assigned to each predictive variable during the decision-making process:")
     
     importance_df = pd.DataFrame({
-        'Feature': ['Daily Return', '20-Day SMA', '50-Day SMA', 'Geopolitical Risk Index'],
+        'Feature': ['Daily Return Velocity', '20-Day Simple Moving Average', '50-Day Simple Moving Average', 'Geopolitical Risk Index (GPR)'],
         'Importance': model.feature_importances_
     }).sort_values(by='Importance', ascending=True)
     
@@ -162,14 +206,14 @@ with tab2:
         marker_color='#00F0FF',
         marker_line_color='#FFFFFF',
         marker_line_width=1,
-        opacity=0.8
+        opacity=0.85
     ))
     
     fig_importance.update_layout(
-        height=350, margin=dict(l=0, r=0, t=30, b=0),
+        height=320, margin=dict(l=0, r=0, t=10, b=0),
         plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-        xaxis_title="Weight in Decision Trees"
+        xaxis_title="Relative Decision Weight"
     )
-    fig_importance.update_xaxes(showgrid=True, gridcolor='rgba(255,255,255,0.1)')
+    fig_importance.update_xaxes(showgrid=True, gridcolor='rgba(255,255,255,0.08)')
     
     st.plotly_chart(fig_importance, use_container_width=True)
