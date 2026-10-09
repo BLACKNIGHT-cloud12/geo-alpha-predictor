@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import yfinance as yf
 
-# 1. Page Configuration & Custom CSS for Permanent Sidebar
+# 1. Page Configuration & Custom CSS (Restored sidebar controls)
 st.set_page_config(page_title="Geo-Alpha Terminal", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
@@ -14,11 +14,6 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    
-    /* Lock the sidebar open by hiding the collapse button */
-    [data-testid="collapsedControl"] {
-        display: none !important;
-    }
     
     /* Sleek container styling */
     div[data-testid="metric-container"] {
@@ -64,7 +59,7 @@ st.title("🌍 Geo-Alpha Intelligence Terminal")
 st.markdown("### Real-time macro risk assessment, technical profiling, and machine learning asset forecasting.")
 st.write("---")
 
-# 4. Permanent Sidebar Controls
+# 4. Sidebar Controls (Now fully accessible with a toggle arrow)
 with st.sidebar:
     st.title("🎛️ Terminal Controls")
     st.write("Configure your macro inspection parameters:")
@@ -75,7 +70,7 @@ with st.sidebar:
     st.markdown("### 📡 System Telemetry")
     st.markdown("**Engine:** Random Forest (v2.4)")
     st.markdown("**Data Feed:** Yahoo Finance + GPR Index")
-    st.markdown("**Status:** <span style='color:#00C853;'>● PERMANENT ONLINE</span>", unsafe_allow_html=True)
+    st.markdown("**Status:** <span style='color:#00C853;'>● ONLINE</span>", unsafe_allow_html=True)
     
     st.markdown("---")
     if st.button("Terminate Session", use_container_width=True):
@@ -204,6 +199,9 @@ with tab2:
         plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
         xaxis_title="Relative Decision Weight"
     )
+    fig_importance.update_xaxes(showgrid=True, gridcolor='rgba(255,255,255,0.08)')
+    
+    st.plotly_chart(fig_importance, use_container_width=True)
     fig_importance.update_xaxes(showgrid=True, gridcolor='rgba(255,255,255,0.08)')
     
     st.plotly_chart(fig_importance, use_container_width=True)
