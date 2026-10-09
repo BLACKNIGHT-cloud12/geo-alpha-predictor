@@ -5,15 +5,20 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import yfinance as yf
 
-# 1. Page Configuration & Custom CSS
+# 1. Page Configuration & Custom CSS for Permanent Sidebar
 st.set_page_config(page_title="Geo-Alpha Terminal", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
-    /* Hide Streamlit default branding */
+    /* Hide Streamlit default branding & header */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+    
+    /* Lock the sidebar open by hiding the collapse button */
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
     
     /* Sleek container styling */
     div[data-testid="metric-container"] {
@@ -22,18 +27,6 @@ st.markdown("""
         padding: 15px;
         border-radius: 12px;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-    }
-    
-    /* Login Box Styling */
-    .login-box {
-        background-color: #161622;
-        padding: 40px;
-        border-radius: 16px;
-        border: 1px solid #2A2A3C;
-        max-width: 450px;
-        margin: 100px auto;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -71,10 +64,7 @@ st.title("🌍 Geo-Alpha Intelligence Terminal")
 st.markdown("### Real-time macro risk assessment, technical profiling, and machine learning asset forecasting.")
 st.write("---")
 
-# Note on the sidebar: If you hide the sidebar using the collapse arrow, 
-# a small arrow icon will appear in the top-left corner of the app window to expand it again.
-
-# 4. Sidebar Controls
+# 4. Permanent Sidebar Controls
 with st.sidebar:
     st.title("🎛️ Terminal Controls")
     st.write("Configure your macro inspection parameters:")
@@ -85,7 +75,7 @@ with st.sidebar:
     st.markdown("### 📡 System Telemetry")
     st.markdown("**Engine:** Random Forest (v2.4)")
     st.markdown("**Data Feed:** Yahoo Finance + GPR Index")
-    st.markdown("**Status:** <span style='color:#00C853;'>● SECURE ONLINE</span>", unsafe_allow_html=True)
+    st.markdown("**Status:** <span style='color:#00C853;'>● PERMANENT ONLINE</span>", unsafe_allow_html=True)
     
     st.markdown("---")
     if st.button("Terminate Session", use_container_width=True):
@@ -153,7 +143,7 @@ col4.metric("Model Confidence Score", f"{confidence:.1f}%")
 
 st.write("---")
 
-# 9. Immersive Editorial Macro Briefing (Adds depth and addiction)
+# 9. Immersive Editorial Macro Briefing
 st.markdown("### 📋 Executive Macro Intelligence Briefing")
 if prediction == 1:
     st.success(f"**Market Assessment for {ticker}:** The algorithmic matrix indicates favorable conditions over the next 3 months. Despite lingering global geopolitical frictions reflected in the GPR index, technical price strength (moving averages) is overriding macroeconomic volatility, pointing toward continued capital inflows.")
